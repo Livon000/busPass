@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: ktu-buspass
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /login
+    autoDeploy: true
+    envVars:
+      - key: JAVA_TOOL_OPTIONS
+        value: -XX:MaxRAMPercentage=75 -XX:+UseSerialGC
+      - key: REMEMBER_ME_KEY
+        generateValue: true

@@ -1,5 +1,6 @@
 package in.edu.ktu.buspass.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -10,6 +11,10 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 public class SecurityConfig {
+
+    /** Override with the REMEMBER_ME_KEY environment variable in any real deployment. */
+    @Value("${app.remember-me.key:ktu-buspass-demo-key-change-in-production}")
+    private String rememberMeKey;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -40,7 +45,7 @@ public class SecurityConfig {
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID", "remember-me"))
                 .rememberMe(remember -> remember
-                        .key("ktu-buspass-demo-key-change-in-production")
+                        .key(rememberMeKey)
                         .userDetailsService(userDetailsService)
                         .tokenValiditySeconds(7 * 24 * 60 * 60))
                 .csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**"))

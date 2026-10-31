@@ -1,0 +1,12 @@
+target/
+data/
+.git/
+.github/
+.idea/
+.vscode/
+*.iml
+.DS_Store
+**/.DS_Store
+README.md
+LICENSE
+render.yaml

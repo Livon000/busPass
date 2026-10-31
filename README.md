@@ -22,7 +22,8 @@ Built with **Java 17 + Spring Boot 3.5 + Thymeleaf + Spring Security + Spring Da
 Requires Java 17+ (no separate Maven install needed — the Maven wrapper is included).
 
 ```bash
-cd ~/Desktop/buspass
+git clone https://github.com/Livon000/busPass.git
+cd busPass
 ./mvnw spring-boot:run
 ```
 

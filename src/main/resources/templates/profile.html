@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Profile')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav}"></header>
+
+<main class="page page-narrow">
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <section class="page-head">
+        <div>
+            <p class="eyebrow">Account</p>
+            <h1>Your profile</h1>
+            <p class="muted">Register number and department are managed by the college and cannot be edited here.</p>
+        </div>
+    </section>
+
+    <div class="profile-grid">
+        <section class="card">
+            <div class="profile-top">
+                <span class="avatar avatar-lg" th:text="${#strings.substring(student.name, 0, 1)}">A</span>
+                <div>
+                    <h2 th:text="${student.name}">Aravind Menon</h2>
+                    <p class="muted" th:text="${student.registerNo}">TVE22CS001</p>
+                </div>
+                <span class="badge" th:classappend="${student.admin} ? 'badge-info' : 'badge-muted'"
+                      th:text="${student.admin} ? 'Administrator' : 'Student'">Student</span>
+            </div>
+            <dl class="mini-list">
+                <div><dt>Email</dt><dd th:text="${student.email}">aravind@example.com</dd></div>
+                <div><dt>Phone</dt><dd th:text="${student.phone} ?: '—'">9876543210</dd></div>
+                <div><dt>Department</dt><dd th:text="${student.department}">Computer Science</dd></div>
+                <div><dt>Account created</dt><dd th:text="${#temporals.format(student.createdAt, 'd MMM yyyy')}">1 Nov 2026</dd></div>
+            </dl>
+        </section>
+
+        <section class="card">
+            <h2 class="card-title">Change password</h2>
+            <p class="muted small">Use at least 8 characters. You will stay signed in after changing it.</p>
+
+            <form th:action="@{/profile/password}" th:object="${passwordForm}" method="post" class="stack">
+                <div class="alert alert-error" role="alert" th:if="${#fields.hasGlobalErrors()}">
+                    <span class="alert-icon" aria-hidden="true">!</span>
+                    <span th:each="err : ${#fields.globalErrors()}" th:text="${err}">Error</span>
+                </div>
+
+                <div class="field">
+                    <label for="currentPassword">Current password</label>
+                    <input id="currentPassword" type="password" th:field="*{currentPassword}"
+                           autocomplete="current-password"
+                           th:classappend="${#fields.hasErrors('currentPassword')} ? 'is-invalid'">
+                    <p class="field-error" th:if="${#fields.hasErrors('currentPassword')}" th:errors="*{currentPassword}">Error</p>
+                </div>
+
+                <div class="field">
+                    <label for="newPassword">New password</label>
+                    <input id="newPassword" type="password" th:field="*{newPassword}"
+                           autocomplete="new-password"
+                           th:classappend="${#fields.hasErrors('newPassword')} ? 'is-invalid'">
+                    <p class="field-error" th:if="${#fields.hasErrors('newPassword')}" th:errors="*{newPassword}">Error</p>
+                </div>
+
+                <div class="field">
+                    <label for="confirmPassword">Confirm new password</label>
+                    <input id="confirmPassword" type="password" th:field="*{confirmPassword}"
+                           autocomplete="new-password"
+                           th:classappend="${#fields.hasErrors('confirmPassword')} ? 'is-invalid'">
+                    <p class="field-error" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}">Error</p>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Update password</button>
+            </form>
+        </section>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

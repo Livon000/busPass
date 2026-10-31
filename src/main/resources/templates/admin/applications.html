@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Admin')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav}"></header>
+
+<main class="page">
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <section class="page-head">
+        <div>
+            <p class="eyebrow">Bus pass cell</p>
+            <h1>Applications</h1>
+            <p class="muted">Approve or reject student bus pass requests. Students see your remarks immediately.</p>
+        </div>
+    </section>
+
+    <div class="stats">
+        <div class="stat">
+            <span class="stat-label">Pending</span>
+            <strong th:text="${pendingCount}">2</strong>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Approved</span>
+            <strong th:text="${approvedCount}">12</strong>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Rejected</span>
+            <strong th:text="${rejectedCount}">1</strong>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Total</span>
+            <strong th:text="${totalCount}">15</strong>
+        </div>
+    </div>
+
+    <div class="filter-tabs" role="tablist" aria-label="Filter by status">
+        <a th:each="statusOption : ${statuses}"
+           th:href="@{/admin(status=${statusOption})}"
+           class="filter-tab"
+           th:classappend="${filter == statusOption} ? 'active'"
+           th:text="${statusOption.label}">Pending</a>
+    </div>
+
+    <section class="card empty-state" th:if="${#lists.isEmpty(applications)}">
+        <div class="empty-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+                <path d="M20 6 9 17l-5-5"/>
+            </svg>
+        </div>
+        <div>
+            <h2>Nothing here</h2>
+            <p class="muted" th:text="${'No ' + filter.label.toLowerCase() + ' applications.'}">No pending applications.</p>
+        </div>
+    </section>
+
+    <div class="card table-card" th:if="${!#lists.isEmpty(applications)}">
+        <table class="admin-table">
+            <thead>
+            <tr>
+                <th>Student</th>
+                <th>Route</th>
+                <th>Pass</th>
+                <th>Validity</th>
+                <th>Fee</th>
+                <th>Status</th>
+                <th class="cell-action">Decision</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="item : ${applications}">
+                <td>
+                    <strong th:text="${item.student.name}">Diya Nair</strong>
+                    <div class="muted small" th:text="${item.student.registerNo + ' · ' + item.student.department}">TVE22EC014 · Electronics</div>
+                    <a class="link small" th:href="@{/pass/{id}(id=${item.id})}">Open pass</a>
+                </td>
+                <td>
+                    <span th:text="${item.route.code + ' · ' + item.route.name}">R1 · Technopark</span>
+                    <div class="muted small" th:text="${item.route.summary}">Kazhakkoottam → KTU Campus</div>
+                </td>
+                <td th:text="${item.passType.label}">Semester</td>
+                <td>
+                    <span th:text="${#temporals.format(item.validFrom, 'd MMM yyyy')}">01 Nov 2026</span>
+                    –
+                    <span th:text="${#temporals.format(item.validTo, 'd MMM yyyy')}">30 Apr 2027</span>
+                </td>
+                <td th:text="${'₹' + #numbers.formatDecimal(item.fee, 1, 'COMMA', 0, 'POINT')}">₹3,780</td>
+                <td>
+                    <span class="badge" th:classappend="'badge-' + ${item.status.badge}" th:text="${item.status.label}">Pending</span>
+                    <div class="muted small" th:if="${item.remarks}" th:text="${item.remarks}">Remarks</div>
+                </td>
+                <td class="cell-action">
+                    <form th:if="${item.pending}" th:action="@{/admin/passes/{id}/approve(id=${item.id})}" method="post" class="decision-form">
+                        <input type="text" name="remarks" maxlength="255" placeholder="Remarks (optional)" aria-label="Remarks">
+                        <div class="split-actions">
+                            <button type="submit" class="btn btn-primary btn-sm">Approve</button>
+                            <button type="submit" th:formaction="@{/admin/passes/{id}/reject(id=${item.id})}" class="btn btn-danger btn-sm">Reject</button>
+                        </div>
+                    </form>
+                    <span class="muted small" th:unless="${item.pending}">Decision recorded</span>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

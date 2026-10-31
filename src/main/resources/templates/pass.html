@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Bus pass')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav}"></header>
+
+<main class="page page-narrow">
+    <a class="back-link" th:href="@{/passes}">← All passes</a>
+
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <section class="page-head">
+        <div>
+            <p class="eyebrow">Pass details</p>
+            <h1 th:text="${pass.route.summary}">East Fort → KTU Campus</h1>
+            <p class="muted">
+                <span th:text="${pass.passType.label}">Monthly</span> pass ·
+                <span th:text="${pass.route.code}">R2</span>
+            </p>
+        </div>
+        <span class="badge badge-lg" th:classappend="'badge-' + ${pass.status.badge}" th:text="${pass.status.label}">Pending</span>
+    </section>
+
+    <div class="pass-layout">
+        <article class="pass-card">
+            <div class="pass-card-head">
+                <div>
+                    <span class="ticket-brand">KTU Bus Pass</span>
+                    <p class="pass-type" th:text="${pass.passType.label + ' pass'}">Monthly pass</p>
+                </div>
+                <span class="route-code route-code-lg" th:text="${pass.route.code}">R2</span>
+            </div>
+
+            <div class="pass-body">
+                <div class="pass-info">
+                    <div class="pass-holder">
+                        <span class="pass-label">Pass holder</span>
+                        <strong th:text="${pass.student.name}">Aravind Menon</strong>
+                        <span th:text="${pass.student.registerNo}">TVE22CS001</span>
+                        <span th:text="${pass.student.department}">Computer Science</span>
+                    </div>
+                    <div class="pass-route">
+                        <span class="pass-label">Route</span>
+                        <strong th:text="${pass.route.summary}">East Fort → KTU Campus</strong>
+                        <span th:text="${pass.route.stops}">Stops</span>
+                    </div>
+                    <div class="pass-validity">
+                        <div>
+                            <span class="pass-label">Valid from</span>
+                            <strong th:text="${#temporals.format(pass.validFrom, 'dd MMM yyyy')}">01 Nov 2026</strong>
+                        </div>
+                        <div>
+                            <span class="pass-label">Valid until</span>
+                            <strong th:text="${#temporals.format(pass.validTo, 'dd MMM yyyy')}">30 Nov 2026</strong>
+                        </div>
+                    </div>
+                    <div class="pass-ref">
+                        <span class="pass-label">Reference</span>
+                        <code th:text="${pass.reference}">KTU-2026-ABCDEF</code>
+                    </div>
+                </div>
+
+                <div class="pass-qr">
+                    <div class="qr-frame" th:if="${pass.approved}">
+                        <img th:src="${qrCode}" width="200" height="200" alt="QR code to verify this pass">
+                    </div>
+                    <div class="qr-frame qr-locked" th:unless="${pass.approved}">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+                            <rect x="5" y="10" width="14" height="10" rx="2"/>
+                            <path d="M8 10V7a4 4 0 0 1 8 0v3"/>
+                        </svg>
+                        <span>QR code available after approval</span>
+                    </div>
+                    <span class="qr-caption" th:if="${pass.approved}">Scan to verify</span>
+                </div>
+            </div>
+
+            <div class="pass-card-foot">
+                <span class="muted small">Issued via the KTU Bus Pass Portal</span>
+                <span class="muted small" th:text="${'Fee ₹' + #numbers.formatDecimal(pass.fee, 1, 'COMMA', 2, 'POINT')}">Fee ₹1,100.00</span>
+            </div>
+        </article>
+
+        <aside class="stack">
+            <section class="card">
+                <h2 class="card-title">Application</h2>
+                <dl class="mini-list">
+                    <div><dt>Status</dt><dd><span class="badge" th:classappend="'badge-' + ${pass.status.badge}" th:text="${pass.status.label}">Pending</span></dd></div>
+                    <div><dt>Fee</dt><dd th:text="${'₹' + #numbers.formatDecimal(pass.fee, 1, 'COMMA', 2, 'POINT')}">₹1,100.00</dd></div>
+                    <div><dt>Duration</dt><dd th:text="${pass.durationLabel}">1 month</dd></div>
+                    <div th:if="${pass.remarks}"><dt>Remarks</dt><dd th:text="${pass.remarks}">Verified</dd></div>
+                </dl>
+                <a class="btn btn-ghost btn-block" th:if="${pass.approved}" th:href="${verifyUrl}" target="_blank" rel="noopener">Open verification page</a>
+            </section>
+
+            <section class="card" th:if="${pass.pending and pass.student.registerNo == currentStudent.registerNo}">
+                <h2 class="card-title">Need to cancel?</h2>
+                <p class="muted small">You can withdraw a pending application and apply again with different details.</p>
+                <form th:action="@{/pass/{id}/cancel(id=${pass.id})}" method="post" class="inline-form">
+                    <button type="submit" class="btn btn-danger btn-block">Cancel application</button>
+                </form>
+            </section>
+
+            <section class="card" th:if="${currentStudent.admin and pass.pending}">
+                <h2 class="card-title">Decision</h2>
+                <form th:action="@{/admin/passes/{id}/approve(id=${pass.id})}" method="post" class="stack">
+                    <div class="field">
+                        <label for="remarks">Remarks (optional)</label>
+                        <input id="remarks" name="remarks" type="text" maxlength="255" placeholder="e.g. Counter payment received">
+                    </div>
+                    <div class="split-actions">
+                        <button type="submit" th:formaction="@{/admin/passes/{id}/approve(id=${pass.id})}" class="btn btn-primary">Approve</button>
+                        <button type="submit" th:formaction="@{/admin/passes/{id}/reject(id=${pass.id})}" class="btn btn-danger">Reject</button>
+                    </div>
+                </form>
+            </section>
+
+            <section class="card">
+                <h2 class="card-title">Print</h2>
+                <p class="muted small">Shown on a phone is fine. Print a copy only if you prefer paper.</p>
+                <button type="button" class="btn btn-ghost btn-block" onclick="window.print()">Print this pass</button>
+            </section>
+        </aside>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

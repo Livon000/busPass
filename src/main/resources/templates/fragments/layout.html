@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${title + ' · KTU Bus Pass'}">KTU Bus Pass</title>
+    <link rel="icon" type="image/svg+xml" th:href="@{/images/favicon.svg}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<header th:fragment="nav" class="site-header">
+    <a class="brand" th:href="@{/dashboard}" aria-label="KTU Bus Pass home">
+        <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                <rect x="4" y="3.5" width="16" height="13" rx="2.5"/>
+                <path d="M4 11h16M8 16.5v2M16 16.5v2"/>
+                <circle cx="8" cy="13.5" r="0.6" fill="currentColor"/>
+                <circle cx="16" cy="13.5" r="0.6" fill="currentColor"/>
+            </svg>
+        </span>
+        <span class="brand-text">
+            <strong>KTU Bus Pass</strong>
+            <small>Student transport portal</small>
+        </span>
+    </a>
+
+    <nav class="site-nav" th:if="${currentStudent != null}" aria-label="Main">
+        <a th:href="@{/dashboard}" th:classappend="${activeNav == 'dashboard'} ? 'active'">Dashboard</a>
+        <a th:if="${!currentStudent.admin}" th:href="@{/passes}" th:classappend="${activeNav == 'passes'} ? 'active'">My passes</a>
+        <a th:if="${!currentStudent.admin}" th:href="@{/pass/apply}" th:classappend="${activeNav == 'apply'} ? 'active'">Apply</a>
+        <a th:if="${currentStudent.admin}" th:href="@{/admin}" th:classappend="${activeNav == 'admin'} ? 'active'">Admin</a>
+        <a th:href="@{/profile}" th:classappend="${activeNav == 'profile'} ? 'active'">Profile</a>
+    </nav>
+
+    <div class="site-user" th:if="${currentStudent != null}">
+        <span class="avatar" th:text="${#strings.substring(currentStudent.name, 0, 1)}">A</span>
+        <span class="site-user-name">
+            <strong th:text="${currentStudent.name}">Aravind Menon</strong>
+            <small th:text="${currentStudent.registerNo}">TVE22CS001</small>
+        </span>
+        <form th:action="@{/logout}" method="post" class="inline-form">
+            <button type="submit" class="btn btn-ghost btn-sm">Sign out</button>
+        </form>
+    </div>
+</header>
+
+<div th:fragment="alerts">
+    <div class="alert alert-success" role="status" th:if="${success}">
+        <span class="alert-icon" aria-hidden="true">✓</span>
+        <span th:text="${success}">Done.</span>
+    </div>
+    <div class="alert alert-error" role="alert" th:if="${error}">
+        <span class="alert-icon" aria-hidden="true">!</span>
+        <span th:text="${error}">Something went wrong.</span>
+    </div>
+</div>
+
+<footer th:fragment="footer" class="site-footer">
+    <span>KTU Bus Pass Portal</span>
+    <span class="dot">·</span>
+    <span>Built with Spring Boot &amp; Thymeleaf</span>
+    <span class="dot">·</span>
+    <a th:href="@{/verify}">Pass verification</a>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Verify a pass')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav}"></header>
+
+<main class="page page-narrow">
+    <section class="page-head">
+        <div>
+            <p class="eyebrow">Public check</p>
+            <h1>Verify a bus pass</h1>
+            <p class="muted">Scan the QR code on a pass, or type the reference printed on it.</p>
+        </div>
+    </section>
+
+    <div class="verify-grid">
+        <section class="card">
+            <form th:action="@{/verify}" method="get" class="stack">
+                <div class="field">
+                    <label for="reference">Pass reference</label>
+                    <input id="reference" name="reference" type="text" placeholder="KTU-2026-ABCDEF"
+                           autocapitalize="characters" spellcheck="false" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Check pass</button>
+            </form>
+        </section>
+
+        <section class="card verify-result" th:if="${pass != null}">
+            <div class="verify-status" th:classappend="${valid} ? 'is-valid' : 'is-invalid'">
+                <span class="verify-dot" aria-hidden="true"></span>
+                <div>
+                    <strong th:text="${valid ? 'Valid pass' : 'Not valid right now'}">Valid pass</strong>
+                    <p class="muted small"
+                       th:text="${valid ? 'This pass is active today.' : 'This pass is not active today. It may be awaiting approval, start later, or have expired.'}">
+                        This pass is active today.
+                    </p>
+                </div>
+            </div>
+            <dl class="mini-list">
+                <div><dt>Status</dt><dd><span class="badge" th:classappend="'badge-' + ${pass.status.badge}" th:text="${pass.status.label}">Approved</span></dd></div>
+                <div><dt>Holder</dt><dd th:text="${pass.student.name}">Aravind Menon</dd></div>
+                <div><dt>Register no</dt><dd th:text="${pass.student.registerNo}">TVE22CS001</dd></div>
+                <div><dt>Route</dt><dd th:text="${pass.route.summary}">East Fort → KTU Campus</dd></div>
+                <div><dt>Type</dt><dd th:text="${pass.passType.label}">Monthly</dd></div>
+                <div><dt>Valid</dt><dd>
+                    <span th:text="${#temporals.format(pass.validFrom, 'd MMM yyyy')}">01 Nov</span>
+                    –
+                    <span th:text="${#temporals.format(pass.validTo, 'd MMM yyyy')}">30 Nov</span>
+                </dd></div>
+                <div><dt>Reference</dt><dd><code th:text="${pass.reference}">KTU-2026-ABCDEF</code></dd></div>
+            </dl>
+        </section>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

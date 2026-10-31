@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('My passes')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav}"></header>
+
+<main class="page">
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <section class="page-head">
+        <div>
+            <p class="eyebrow">Travel history</p>
+            <h1>My passes</h1>
+            <p class="muted">Every application you have submitted, newest first.</p>
+        </div>
+        <a class="btn btn-primary" th:if="${!currentStudent.admin}" th:href="@{/pass/apply}">New application</a>
+    </section>
+
+    <section class="card empty-state" th:if="${#lists.isEmpty(passes)}">
+        <div class="empty-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+                <rect x="3" y="5" width="18" height="14" rx="2"/>
+                <path d="M3 10h18M8 15h3"/>
+            </svg>
+        </div>
+        <div>
+            <h2>No applications yet</h2>
+            <p class="muted">Apply for your first bus pass and it will appear here.</p>
+        </div>
+        <a class="btn btn-primary" th:if="${!currentStudent.admin}" th:href="@{/pass/apply}">Apply for a pass</a>
+    </section>
+
+    <div class="card table-card" th:if="${!#lists.isEmpty(passes)}">
+        <table>
+            <thead>
+            <tr>
+                <th>Reference</th>
+                <th>Route</th>
+                <th>Type</th>
+                <th>Validity</th>
+                <th>Fee</th>
+                <th>Status</th>
+                <th class="cell-action">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="item : ${passes}">
+                <td>
+                    <a class="link" th:href="@{/pass/{id}(id=${item.id})}"><code th:text="${item.reference}">KTU-2026-ABCDEF</code></a>
+                    <div class="muted small" th:if="${item.active}">Currently active</div>
+                    <div class="muted small" th:if="${item.expired}">Expired</div>
+                </td>
+                <td>
+                    <span th:text="${item.route.code + ' · ' + item.route.name}">R2 · City</span>
+                    <div class="muted small" th:text="${item.route.summary}">East Fort → KTU Campus</div>
+                </td>
+                <td th:text="${item.passType.label}">Monthly</td>
+                <td>
+                    <span th:text="${#temporals.format(item.validFrom, 'd MMM yyyy')}">01 Nov 2026</span>
+                    –
+                    <span th:text="${#temporals.format(item.validTo, 'd MMM yyyy')}">30 Nov 2026</span>
+                </td>
+                <td th:text="${'₹' + #numbers.formatDecimal(item.fee, 1, 'COMMA', 0, 'POINT')}">₹1,100</td>
+                <td><span class="badge" th:classappend="'badge-' + ${item.status.badge}" th:text="${item.status.label}">Pending</span></td>
+                <td class="cell-action">
+                    <a class="link" th:href="@{/pass/{id}(id=${item.id})}">View</a>
+                    <form th:if="${item.pending}" th:action="@{/pass/{id}/cancel(id=${item.id})}" method="post" class="inline-form">
+                        <button type="submit" class="link link-danger">Cancel</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

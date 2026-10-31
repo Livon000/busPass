@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Create account')}"></head>
+<body class="auth-body">
+<div class="auth-shell">
+    <section class="auth-aside">
+        <a class="brand brand-inverse" th:href="@{/}">
+            <span class="brand-mark" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                    <rect x="4" y="3.5" width="16" height="13" rx="2.5"/>
+                    <path d="M4 11h16M8 16.5v2M16 16.5v2"/>
+                </svg>
+            </span>
+            <span class="brand-text">
+                <strong>KTU Bus Pass</strong>
+                <small>Student transport portal</small>
+            </span>
+        </a>
+
+        <div class="auth-hero">
+            <p class="eyebrow">New account</p>
+            <h1>Your route<br>starts here.</h1>
+            <p class="lede">Register once with your KTU register number. Approvals are handled by the bus pass cell.</p>
+        </div>
+
+        <ol class="auth-steps">
+            <li><span>01</span> Create your student account</li>
+            <li><span>02</span> Choose your daily route</li>
+            <li><span>03</span> Wait for approval, then travel</span></li>
+        </ol>
+
+        <p class="auth-foot">APJ Abdul Kalam Technological University · Kerala</p>
+    </section>
+
+    <main class="auth-main">
+        <div class="auth-card auth-card-wide">
+            <div class="auth-card-top">
+                <p class="eyebrow">Student registration</p>
+                <h2>Create your account</h2>
+                <p class="muted">All fields marked * are required.</p>
+            </div>
+
+            <form th:action="@{/register}" th:object="${registerForm}" method="post" class="stack">
+                <div class="alert alert-error" role="alert" th:if="${#fields.hasGlobalErrors()}">
+                    <span class="alert-icon" aria-hidden="true">!</span>
+                    <span th:each="err : ${#fields.globalErrors()}" th:text="${err}">Error</span>
+                </div>
+
+                <div class="form-grid">
+                    <div class="field">
+                        <label for="registerNo">KTU register number *</label>
+                        <input id="registerNo" type="text" th:field="*{registerNo}" placeholder="TVE22CS001"
+                               autocomplete="username" autocapitalize="characters" spellcheck="false"
+                               th:classappend="${#fields.hasErrors('registerNo')} ? 'is-invalid'">
+                        <p class="field-error" th:if="${#fields.hasErrors('registerNo')}" th:errors="*{registerNo}">Error</p>
+                    </div>
+
+                    <div class="field">
+                        <label for="name">Full name *</label>
+                        <input id="name" type="text" th:field="*{name}" placeholder="Aravind Menon" autocomplete="name"
+                               th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'">
+                        <p class="field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Error</p>
+                    </div>
+
+                    <div class="field">
+                        <label for="email">Email *</label>
+                        <input id="email" type="email" th:field="*{email}" placeholder="you@example.com" autocomplete="email"
+                               th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'">
+                        <p class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Error</p>
+                    </div>
+
+                    <div class="field">
+                        <label for="phone">Phone</label>
+                        <input id="phone" type="tel" th:field="*{phone}" placeholder="98765 43210" autocomplete="tel"
+                               th:classappend="${#fields.hasErrors('phone')} ? 'is-invalid'">
+                        <p class="field-error" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}">Error</p>
+                    </div>
+
+                    <div class="field field-full">
+                        <label for="department">Department *</label>
+                        <select id="department" th:field="*{department}"
+                                th:classappend="${#fields.hasErrors('department')} ? 'is-invalid'">
+                            <option value="">Select your department</option>
+                            <option th:each="dept : ${departments}" th:value="${dept}" th:text="${dept}"></option>
+                        </select>
+                        <p class="field-error" th:if="${#fields.hasErrors('department')}" th:errors="*{department}">Error</p>
+                    </div>
+
+                    <div class="field">
+                        <label for="password">Password *</label>
+                        <input id="password" type="password" th:field="*{password}" placeholder="At least 8 characters"
+                               autocomplete="new-password"
+                               th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'">
+                        <p class="field-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">Error</p>
+                    </div>
+
+                    <div class="field">
+                        <label for="confirmPassword">Confirm password *</label>
+                        <input id="confirmPassword" type="password" th:field="*{confirmPassword}" placeholder="Repeat password"
+                               autocomplete="new-password"
+                               th:classappend="${#fields.hasErrors('confirmPassword')} ? 'is-invalid'">
+                        <p class="field-error" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}">Error</p>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block">Create account</button>
+            </form>
+
+            <p class="auth-switch">Already registered? <a th:href="@{/login}">Sign in</a></p>
+        </div>
+    </main>
+</div>
+</body>
+</html>

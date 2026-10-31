@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Dashboard')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav}"></header>
+
+<main class="page">
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <section class="page-head">
+        <div>
+            <p class="eyebrow">Dashboard</p>
+            <h1>Hello, <span th:text="${student.name}">Aravind</span>.</h1>
+            <p class="muted" th:text="${#temporals.format(today, 'EEEE, d MMMM yyyy')}">Saturday, 31 October 2026</p>
+        </div>
+        <a th:if="${!student.admin and !hasOpenPass}" class="btn btn-primary" th:href="@{/pass/apply}">Apply for a pass</a>
+        <a th:if="${student.admin}" class="btn btn-primary" th:href="@{/admin}">Review applications</a>
+    </section>
+
+    <div class="dashboard-grid">
+        <div class="stack-lg">
+            <section th:if="${currentPass != null}">
+                <div class="section-head">
+                    <h2>Your pass</h2>
+                    <a th:href="@{/passes}" class="link">All passes</a>
+                </div>
+                <article class="ticket">
+                    <div class="ticket-main">
+                        <div class="ticket-top">
+                            <span class="ticket-brand">KTU Bus Pass</span>
+                            <span class="badge"
+                                  th:classappend="${currentPass.active} ? 'badge-success' : 'badge-warning'"
+                                  th:text="${currentPass.active} ? 'Active' : 'Starts soon'">Active</span>
+                        </div>
+                        <div class="ticket-route">
+                            <span class="route-code" th:text="${currentPass.route.code}">R2</span>
+                            <div>
+                                <h3 th:text="${currentPass.route.summary}">East Fort → KTU Campus</h3>
+                                <p class="muted" th:text="${currentPass.route.stops}">Stops</p>
+                            </div>
+                        </div>
+                        <dl class="ticket-meta">
+                            <div>
+                                <dt>Pass holder</dt>
+                                <dd th:text="${student.name}">Aravind Menon</dd>
+                            </div>
+                            <div>
+                                <dt>Register no</dt>
+                                <dd th:text="${student.registerNo}">TVE22CS001</dd>
+                            </div>
+                            <div>
+                                <dt>Valid</dt>
+                                <dd>
+                                    <span th:text="${#temporals.format(currentPass.validFrom, 'd MMM')}">01 Nov</span>
+                                    –
+                                    <span th:text="${#temporals.format(currentPass.validTo, 'd MMM yyyy')}">30 Nov 2026</span>
+                                </dd>
+                            </div>
+                        </dl>
+                    </div>
+                    <div class="ticket-stub">
+                        <span class="stub-label">Reference</span>
+                        <code th:text="${currentPass.reference}">KTU-2026-DEMO01</code>
+                        <a class="btn btn-light btn-sm" th:href="@{/pass/{id}(id=${currentPass.id})}">View pass</a>
+                    </div>
+                </article>
+            </section>
+
+            <section th:if="${currentPass == null and pendingPass != null}" class="card empty-state">
+                <div class="empty-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+                        <circle cx="12" cy="12" r="9"/>
+                        <path d="M12 7v5l3 2"/>
+                    </svg>
+                </div>
+                <div>
+                    <span class="badge badge-warning">Pending</span>
+                    <h2>Your application is under review</h2>
+                    <p class="muted">
+                        <span th:text="${pendingPass.route.code + ' · ' + pendingPass.route.summary}">R1 · Kazhakkoottam → KTU Campus</span>
+                        · <span th:text="${pendingPass.passType.label}">Semester</span>
+                        · starts <span th:text="${#temporals.format(pendingPass.validFrom, 'd MMM')}">2 Nov</span>
+                    </p>
+                </div>
+                <a class="btn btn-ghost" th:href="@{/pass/{id}(id=${pendingPass.id})}">View application</a>
+            </section>
+
+            <section th:if="${currentPass == null and pendingPass == null}" class="card empty-state">
+                <div class="empty-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+                        <rect x="3" y="5" width="18" height="14" rx="2"/>
+                        <path d="M3 10h18M8 15h3"/>
+                    </svg>
+                </div>
+                <div>
+                    <h2>No active pass yet</h2>
+                    <p class="muted" th:if="${!student.admin}">Choose a route that passes near your home and apply in under a minute.</p>
+                    <p class="muted" th:if="${student.admin}">Admin accounts do not need a student bus pass.</p>
+                </div>
+                <a th:if="${!student.admin}" class="btn btn-primary" th:href="@{/pass/apply}">Apply for a pass</a>
+            </section>
+
+            <section th:if="${!student.admin}">
+                <div class="section-head">
+                    <h2>Routes</h2>
+                    <span class="muted" th:text="${#lists.size(routes) + ' routes'}">5 routes</span>
+                </div>
+                <div class="route-grid">
+                    <article class="route-card" th:each="route : ${routes}">
+                        <div class="route-card-top">
+                            <span class="route-code" th:text="${route.code}">R1</span>
+                            <span class="fare">₹<span th:text="${#numbers.formatDecimal(route.monthlyFare, 1, 'COMMA', 0, 'POINT')}">700</span><small>/month</small></span>
+                        </div>
+                        <h3 th:text="${route.summary}">Kazhakkoottam → KTU Campus</h3>
+                        <p class="muted small" th:text="${route.stops}">Stops</p>
+                        <div class="route-card-foot">
+                            <span class="muted small" th:text="${#numbers.formatDecimal(route.distanceKm, 1, 1) + ' km'}">8.5 km</span>
+                            <a th:if="${!hasOpenPass}" class="link" th:href="@{/pass/apply}">Apply</a>
+                            <span th:if="${hasOpenPass}" class="muted small">Apply later</span>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            <section th:if="${!#lists.isEmpty(recentPasses)}">
+                <div class="section-head">
+                    <h2>Recent applications</h2>
+                    <a th:href="@{/passes}" class="link">View all</a>
+                </div>
+                <div class="card table-card">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Reference</th>
+                            <th>Route</th>
+                            <th>Type</th>
+                            <th>Valid from</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="item : ${recentPasses}">
+                            <td><code th:text="${item.reference}">KTU-2026-ABCDEF</code></td>
+                            <td th:text="${item.route.code + ' · ' + item.route.name}">R2 · City</td>
+                            <td th:text="${item.passType.label}">Monthly</td>
+                            <td th:text="${#temporals.format(item.validFrom, 'd MMM yyyy')}">01 Nov 2026</td>
+                            <td><span class="badge" th:classappend="'badge-' + ${item.status.badge}" th:text="${item.status.label}">Pending</span></td>
+                            <td class="cell-action"><a class="link" th:href="@{/pass/{id}(id=${item.id})}">Details</a></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+
+        <aside class="stack">
+            <section class="card profile-card">
+                <span class="avatar avatar-lg" th:text="${#strings.substring(student.name, 0, 1)}">A</span>
+                <h2 th:text="${student.name}">Aravind Menon</h2>
+                <p class="muted" th:text="${student.registerNo}">TVE22CS001</p>
+                <dl class="mini-list">
+                    <div><dt>Department</dt><dd th:text="${student.department}">Computer Science</dd></div>
+                    <div><dt>Email</dt><dd th:text="${student.email}">aravind@example.com</dd></div>
+                    <div><dt>Phone</dt><dd th:text="${student.phone} ?: '—'">9876543210</dd></div>
+                </dl>
+                <a class="btn btn-ghost btn-block" th:href="@{/profile}">Manage profile</a>
+            </section>
+
+            <section class="card">
+                <h2 class="card-title">How it works</h2>
+                <ol class="steps">
+                    <li>
+                        <span class="step-num">1</span>
+                        <div><strong>Apply</strong><p class="muted small">Pick a route, pass type and start date.</p></div>
+                    </li>
+                    <li>
+                        <span class="step-num">2</span>
+                        <div><strong>Get approved</strong><p class="muted small">The bus pass cell reviews your request.</p></div>
+                    </li>
+                    <li>
+                        <span class="step-num">3</span>
+                        <div><strong>Travel</strong><p class="muted small">Show the QR pass on your phone at the door.</p></div>
+                    </li>
+                </ol>
+            </section>
+        </aside>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

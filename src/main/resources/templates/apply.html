@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Apply for a pass')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav}"></header>
+
+<main class="page page-narrow">
+    <a class="back-link" th:href="@{/dashboard}">← Back to dashboard</a>
+
+    <section class="page-head">
+        <div>
+            <p class="eyebrow">New application</p>
+            <h1>Apply for a bus pass</h1>
+            <p class="muted">Pick your route and how long you need the pass. The bus pass cell usually reviews requests within one working day.</p>
+        </div>
+    </section>
+
+    <div class="apply-grid">
+        <form th:action="@{/pass/apply}" th:object="${passForm}" method="post" class="card form-card">
+            <div class="alert alert-error" role="alert" th:if="${#fields.hasGlobalErrors()}">
+                <span class="alert-icon" aria-hidden="true">!</span>
+                <span th:each="err : ${#fields.globalErrors()}" th:text="${err}">Error</span>
+            </div>
+
+            <fieldset class="fieldset">
+                <legend>1. Choose your route</legend>
+                <div class="choice-list">
+                    <label class="route-choice" th:each="route : ${routes}">
+                        <input type="radio" th:field="*{routeId}" th:value="${route.id}">
+                        <span class="choice-body">
+                            <span class="choice-head">
+                                <span class="route-code" th:text="${route.code}">R1</span>
+                                <strong th:text="${route.summary}">Kazhakkoottam → KTU Campus</strong>
+                                <span class="fare">₹<span th:text="${#numbers.formatDecimal(route.monthlyFare, 1, 'COMMA', 0, 'POINT')}">700</span><small>/mo</small></span>
+                            </span>
+                            <span class="muted small" th:text="${route.stops}">Stops</span>
+                            <span class="muted small" th:text="${#numbers.formatDecimal(route.distanceKm, 1, 1) + ' km · ' + route.name}">8.5 km</span>
+                        </span>
+                    </label>
+                </div>
+                <p class="field-error" th:if="${#fields.hasErrors('routeId')}" th:errors="*{routeId}">Error</p>
+            </fieldset>
+
+            <fieldset class="fieldset">
+                <legend>2. Pass duration</legend>
+                <div class="type-grid">
+                    <label class="type-choice" th:each="type : ${passTypes}">
+                        <input type="radio" th:field="*{passType}" th:value="${type}">
+                        <span class="choice-body">
+                            <strong th:text="${type.label}">Monthly</strong>
+                            <span class="muted small" th:text="${type.months == 1 ? 'Valid for one calendar month' : 'Valid for six months · 10% off'}">Valid for one month</span>
+                        </span>
+                    </label>
+                </div>
+                <p class="field-error" th:if="${#fields.hasErrors('passType')}" th:errors="*{passType}">Error</p>
+            </fieldset>
+
+            <fieldset class="fieldset">
+                <legend>3. Start date</legend>
+                <div class="field">
+                    <label for="validFrom">Pass starts on</label>
+                    <input id="validFrom" type="date" th:field="*{validFrom}" th:min="${today}"
+                           th:classappend="${#fields.hasErrors('validFrom')} ? 'is-invalid'">
+                    <p class="hint">You can start today or up to 30 days ahead.</p>
+                    <p class="field-error" th:if="${#fields.hasErrors('validFrom')}" th:errors="*{validFrom}">Error</p>
+                </div>
+            </fieldset>
+
+            <label class="checkbox-row declaration">
+                <input type="checkbox" th:field="*{declaration}">
+                <span>I confirm that the register number and route details are correct. I understand that misuse of the pass can lead to cancellation.</span>
+            </label>
+            <p class="field-error" th:if="${#fields.hasErrors('declaration')}" th:errors="*{declaration}">Error</p>
+
+            <div class="form-actions">
+                <a class="btn btn-ghost" th:href="@{/dashboard}">Cancel</a>
+                <button type="submit" class="btn btn-primary">Submit application</button>
+            </div>
+        </form>
+
+        <aside class="stack">
+            <section class="card">
+                <h2 class="card-title">Fees</h2>
+                <p class="muted small">The fare is set per route and charged for the full pass period.</p>
+                <dl class="mini-list">
+                    <div><dt>Monthly</dt><dd>1 × monthly fare</dd></div>
+                    <div><dt>Semester</dt><dd>6 × monthly fare − 10%</dd></div>
+                    <div><dt>Payment</dt><dd>At the pass counter</dd></div>
+                </dl>
+            </section>
+            <section class="card">
+                <h2 class="card-title">Good to know</h2>
+                <ul class="ticks">
+                    <li>One active or pending pass per student.</li>
+                    <li>The QR code becomes scannable once approved.</li>
+                    <li>Keep your college ID with you while travelling.</li>
+                </ul>
+            </section>
+        </aside>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
